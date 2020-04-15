@@ -110,7 +110,7 @@ Check out these related projects.
 
 ### Contributors
 
-[![Sudipt Sharma][sudipt_avatar]][sudipt_homepage]<br/>[Sudipt Sharma][sudipt_homepage] 
+[![Shweta Tyagi][shweta_avatar]][shweta_homepage]<br/>[Shweta Tyagi][shweta_homepage] 
 
   [shweta_homepage]: https://github.com/shwetatyagi-ot
   [shweta_avatar]: https://img.cloudposse.com/75x75/https://github.com/shwetatyagi-ot.png
