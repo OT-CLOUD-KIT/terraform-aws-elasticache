@@ -5,7 +5,7 @@
   [opstree_homepage]: https://opstree.github.io/
   [opstree_avatar]: https://img.cloudposse.com/150x150/https://github.com/opstree.png
 
-- This terraform module will create a complete RDS cluster setup.
+- This terraform module will create a complete ElastiCache cluster setup.
 - This project is a part of opstree's ot-aws initiative for terraform modules.
 
 ## Usage
@@ -93,7 +93,7 @@ output "auth_token" {
 
 | Name | Description |
 |------|-------------|
-| db_instance_endpoint | Endpoint of the DB instance |
+| primary_endpoint_address | The address of the replication group configuration endpoint when cluster mode is enabled |
 | db_instance_port | Port of the DB instance |
 
 
@@ -109,3 +109,8 @@ Check out these related projects.
 - [rolling_deployment](https://gitlab.com/ot-aws/terrafrom_v0.12.21/rolling_deployment.git) - This terraform module will orchestrate rolling deployment.
 
 ### Contributors
+
+[![Sudipt Sharma][sudipt_avatar]][sudipt_homepage]<br/>[Sudipt Sharma][sudipt_homepage] 
+
+  [shweta_homepage]: https://github.com/shwetatyagi-ot
+  [shweta_avatar]: https://img.cloudposse.com/75x75/https://github.com/shwetatyagi-ot.png
