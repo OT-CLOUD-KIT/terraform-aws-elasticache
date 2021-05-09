@@ -5,6 +5,10 @@ image:
 stages:
   - lint
   - test
+  - infracost
+include:
+    # Use a specific version of the template instead of master if locking the template is preferred
+    remote: 'https://gitlab.com/infracost/infracost-gitlab-ci/-/raw/master/infracost.yml'
 
 codelint:    
   stage: lint
@@ -15,5 +19,38 @@ codetest:
   stage: test
   script:
     - echo "To be written in future development"
-...
-
+  
+infracost-job:
+    # only:
+    #   - merge_requests
+    stage: infracost
+    extends: .infracost
+    variables:
+      path: "."
+    # terraform_plan_flags: "-var-file=my.tfvars"
+.infracost:
+  image:
+    name: infracost/infracost:latest # Use a specific version of the image instead of latest if locking the image is preferred
+    entrypoint: [""] # Do not run the default entrypoint
+  script: "/scripts/ci/diff.sh" # Do not change
+  variables:
+    # Path to the Terraform directory or JSON/plan file. Either `path` or `config_file` is required.
+    path: "."
+    #
+    # Flags to pass to the 'terraform plan' command, e.g. `"-var-file=my.tfvars -var-file=other.tfvars"`. Applicable when path is a Terraform directory.
+    # terraform_plan_flags:
+    #
+    # The Terraform workspace to use. Applicable when path is a Terraform directory. Only set this for multi-workspace deployments, otherwise it might result in the Terraform error "workspaces not supported".
+    # terraform_workspace:
+    #
+    # Path to Infracost usage file (https://www.infracost.io/docs/usage_based_resources) that specifies values for usage-based resources, see https://github.com/infracost/infracost/blob/master/infracost-usage-example.yml for the available options.
+    # usage_file:
+    #
+    # If your repo has multiple Terraform projects or workspaces, define them in a config file (https://www.infracost.io/docs/config_file/) and set this input to its path. Their results will be combined into the same diff output. Cannot be used with path, terraform_plan_flags or usage_file inputs.
+    # config_file:
+    #
+    # A JSON string describing the condition that triggers pull request comments, can be one of these:
+    #  - `'{"has_diff": true}'`: only post a comment if there is a diff. This is the default behavior.
+    #  - `'{"always": true}'`: always post a comment.
+    #  - `'{"percentage_threshold": 0}'`: absolute percentage threshold that triggers a comment. For example, set to 1 to post a comment if the cost estimate changes by more than plus or minus 1%.
+    post_condition: '{"always": true}'

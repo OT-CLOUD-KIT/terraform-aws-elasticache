@@ -79,11 +79,10 @@ variable "redis_family" {
 
 variable "engine" {
   type        = string
-  default     = "redis"
   description = "Specify Engine type"
   validation {
     condition     = contains(["redis", "memcached"], var.engine)
-    error_message = "Aws Elasticache support 2 types of engine redis and memcached."
+    error_message = "AWS Elasticache support 2 types of engine redis and memcached."
   }
 }
 variable "port" {
@@ -99,7 +98,7 @@ variable "subnet_group_name" {
 variable "subnet_ids" {
   type        = list(string)
   default     = []
-  description = "List of VPC Subnet IDs for the cache subnet group"
+  description = "List of VPC Subnet IDs for the cache subnet group."
   validation {
     condition = alltrue([
       for id in var.subnet_ids : can(regex("^subnet-", id))
@@ -121,6 +120,7 @@ variable "security_group_ids" {
 variable "parameter_group_name" {
   type    = string
   default = ""
+ description = "The name of the parameter group to associate with this replication group. If this argument is omitted, the default cache parameter group for the specified engine is used. To enable 'cluster mode', i.e. data sharding, use a parameter group that has the parameter cluster-enabled set to true."
 }
 
 variable "snapshot_arns" {
@@ -250,4 +250,5 @@ variable "replication_group_id" {
 variable "availability_zone" {
   type    = string
   default = ""
+  description = "Availability Zone for the cache cluster. If you want to create cache nodes in multi-az, use preferred_availability_zones instead. Default: System chosen Availability Zone. Changing this value will re-create the resource."
 }

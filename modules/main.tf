@@ -12,7 +12,7 @@ resource "random_string" "auth_token" {
 }
 /*-------------------------------------------------------*/
 resource "aws_security_group" "redis_sg" {
-  count  = var.engine == "redis" ? 1 : 0
+  count  =  length(var.security_group_ids) ==0 && var.engine == "redis" ? 1 : 0
   name   = "${var.name}-${var.engine}-cluster-sg"
   vpc_id = data.aws_vpc.vpc.id
   ingress {
@@ -30,7 +30,7 @@ resource "aws_security_group" "redis_sg" {
   tags = var.tags
 }
 resource "aws_security_group" "memcached_sg" {
-  count  = var.engine == "memcached" ? 1 : 0
+  count  =  length(var.security_group_ids) ==0 && var.engine == "memcached" ? 1 : 0
   name   = "${var.name}-${var.engine}-cluster-sg"
   vpc_id = data.aws_vpc.vpc.id
   ingress {
@@ -66,7 +66,7 @@ resource "aws_elasticache_replication_group" "redis" {
   count                         = var.engine == "redis" ? 1 : 0
   replication_group_id          = "${lower(var.name)}-redis-cluster"
   replication_group_description = var.replication_group_description != "" ? var.replication_group_description : "${var.name} Redis Cluster"
-  number_cache_clusters         = var.cluster_mode_enabled ? null : var.number_cache_clusters
+  number_cache_clusters         = var.cluster_mode_enabled ? null : ( var.automatic_failover_enabled && var.number_cache_clusters == 1 ? var.number_cache_clusters+1 : var.number_cache_clusters)
   node_type                     = var.node_type
   automatic_failover_enabled    = var.multi_az_enabled ? true : var.automatic_failover_enabled
   multi_az_enabled              = var.multi_az_enabled
@@ -80,7 +80,7 @@ resource "aws_elasticache_replication_group" "redis" {
   parameter_group_name          = coalesce(var.parameter_group_name, join("", aws_elasticache_parameter_group.default.*.name))
   port                          = var.port
   subnet_group_name             = coalesce(var.subnet_group_name, aws_elasticache_subnet_group.elasticache.name)
-  security_group_ids            = coalescelist(var.security_group_ids, [aws_security_group.redis_sg[count.index].id])
+  security_group_ids            = coalescelist(var.security_group_ids, aws_security_group.redis_sg.*.id)
   snapshot_arns                 = var.snapshot_arns
   snapshot_name                 = var.snapshot_name
   maintenance_window            = var.maintenance_window
@@ -110,8 +110,8 @@ resource "aws_elasticache_cluster" "memcached" {
   num_cache_nodes              = var.num_cache_nodes
   parameter_group_name         = coalesce(var.parameter_group_name, join("", aws_elasticache_parameter_group.default.*.name))
   port                         = var.port
-  subnet_group_name            = var.subnet_group_name
-  security_group_ids           = coalescelist(var.security_group_ids, [aws_security_group.memcached_sg[count.index].id])
+  subnet_group_name            = coalesce(var.subnet_group_name, aws_elasticache_subnet_group.elasticache.name)
+  security_group_ids           = coalescelist(var.security_group_ids, aws_security_group.memcached_sg.*.id)
   apply_immediately            = var.apply_immediately
   notification_topic_arn       = var.notification_topic_arn
   az_mode                      = var.az_mode
