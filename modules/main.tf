@@ -49,7 +49,7 @@ resource "aws_security_group" "memcached_sg" {
 }
 /*-------------------------------------------------------*/
 resource "aws_elasticache_parameter_group" "default" {
-  count  = var.parameter_group_enabled ? 1 : 0
+  count  = length(var.parameter_group_name) == 0 && var.parameter_group_enabled ? 1 : 0
   name   = "parameter-group-${var.engine}-${var.name}${var.engine == "redis" && var.cluster_mode_enabled ? "-cluster-on" : ""}"
   family = var.engine == "redis" ? var.redis_family : var.memcached_family
 

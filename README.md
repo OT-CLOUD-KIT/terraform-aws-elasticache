@@ -7,47 +7,126 @@
   - This terraform module will create a complete ElastiCache cluster setup.
   - This project is a part of opstree's ot-aws initiative for terraform modules.
 
+# What is Elasticache?
+Amazon ElastiCache allows you to seamlessly set up, run, and scale popular open-source compatible in-memory data stores in the cloud. Build data-intensive apps or boost the performance of your existing databases by retrieving data from high throughput and low latency in-memory data stores. Amazon ElastiCache is a popular choice for real-time use cases like Caching, Session Stores, Gaming, Geospatial Services, Real-Time Analytics, and Queuing.
+
+Amazon ElastiCache offers fully managed Redis, and Memcached for your most demanding applications that require sub-millisecond response times.
+
+## Redis Architecture 
+* Cluster mode disabled 
+  - Redis clusters are generally placed in private subnets 
+  - Cluster mode disabled – single shard 
+  - A shard has a primary node and 0-5 replicas 
+  - A shard with replicas is also called as a replication group 
+  - Replicas can be deployed as Multi-AZ
+  - Multi-AZ replicas support Auto-Failover capability
+  - Single reader endpoint (auto updates replica endpoint changes)
+* Cluster mode enabled
+   - Cluster mode enabled – multiple shards
+   - Data is distributed across the available shards
+   - A shard has a primary node and 0-5 replicas
+   - Multi-AZ replicas support Auto-Failover capability
+   - Max 90 nodes per cluster (90 shards w/no replicas to 15 shards w/5 replicas each)
+   - Minimum 3 shards recommended for HA
+   - Use nitro system-based node types for higher performance (e.g. M5 / R5 etc) 
+
+## Memcached
+* Overview
+   - Simple in-memory key-value store with sub-millisecond latency
+   - Automatic detection and recovery from cache node failures
+   - Typical applications
+     - Session store (persistent as well as transient session data store)
+     - DB query results caching (relational or NoSQL DBs – RDS/DynamoDB etc.)
+     - Webpage caching
+     - API caching
+     - Object caching (images / files / metadata)
+   - Well suited for web / mobile apps, gaming, IoT, ad-tech, and e-commerce
+* Architecture
+  - Up to 20 nodes per cluster 
+  - Data is distributed across the available nodes 
+  - Replicas are not supported 
+  - Node failure = data loss 
+  - Nodes can be deployed as Multi-AZ (to reduce data loss)   
+
+
 ## Usage
 
+
 ```
+provider "aws" {
+  profile = "default"
+  region  = "us-east-1"
+}
+
+## Local tags are used to define common tags. 
+locals {
+  tags = { "ENVIRONMENT" : "test", "CLIENT" : "DEVOPS", "PROJECT" : "Demo", "ORGANISATION" : "opstree" }
+}
+
+## Example for Elasticache provision in default VPC.
 module "redis" {
   source                  = "./modules"
   name                    = "Opstree"
+  engine                  = "redis"
 }
 module "memcached" {
   source                   = "./modules"
   name                     = "Opstree"
+  engine                   = "memcached"
 }
+## Example for Elasticache provision in user defined VPC and Security.
+module "redis" {
+  source                  = "./modules"
+  name                    = "Opstree"
+  engine                  = "redis"
+  subnet_ids              = ["subnet-2132123","subnet-878746827"]
+  security_group_ids      = ["sg-121212121"]
+  parameter = [{
+    name  = "activerehashing"
+    value = "no"},{
+    name  = "active-expire-effort"
+    value = "2"
+  }]
+  parameter_group_name = "test"
+}
+module "memcached" {
+  source                   = "./modules"
+  name                     = "Opstree"
+  engine                   = "memcached"
+  subnet_ids               = ["subnet-2132123","subnet-878746827"]
+  security_group_ids       = ["sg-121212121"]
+}
+
 ```
+
 
 
 ## Inputs
 
 | Name | Description | Type | Default | Required | Redis/Memcached | Supported |
-|------|-------------|:----:|---------|:--------:|:------:|:---------:|
-| name | The name of the Elasticache cluster. | `string` |`null`| yes | Common for both | |
-| node_type | The instance class used.| `string` | `cache.t2.micro` | no | Common for both | |
-| maintenance_window | Specifies the weekly time range for when maintenance on the cache cluster is performed. The format is ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC).The minimum maintenance window is a 60 minute period. Example: sun:05:00-sun:09:00 | `string` | `sun:05:00-sun:09:00` | no | Common for both | |
-| notification_topic_arn | An Amazon Resource Name (ARN) of an SNS topic to send ElastiCache notifications to. Example: arn:aws:sns:us-east-1:012345678999:my_sns_topic |`string` | `null`| no | Common for both | |
-| engine | Specify Elasticache Engine type | `number` | `redis` | no | common for both | `redis`<br>`memcached` |
+|------|-------------|:----:|---------|:--------:|:---------------:|:---------:|
+| name | The name of the Elasticache cluster. | `string` | | yes | common for both | |
+| engine | Specify Elasticache Engine type | `string` | | yes | common for both | `redis`<br>`memcached` |
+| node_type | The instance class used.| `string` | `cache.t2.micro` | no | common for both | |
+| maintenance_window | Specifies the weekly time range for when maintenance on the cache cluster is performed. The format is ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC).The minimum maintenance window is a 60 minute period. Example: sun:05:00-sun:09:00 | `string` | `sun:05:00-sun:09:00` | no | common for both | |
+| notification_topic_arn | An Amazon Resource Name (ARN) of an SNS topic to send ElastiCache notifications to. Example: arn:aws:sns:us-east-1:012345678999:my_sns_topic |`string` | `null`| no | common for both | |
 | port | The port number on which each of the cache nodes will accept connections. For Memcache the default is 11211, and for Redis the default port is 6379. |`string` | `6379` | no | common for both | |
 | subnet_group_name | The name of the cache subnet group to be used for the replication group. | `string` | `null` | no | common for both | |
 | subnet_ids | List of VPC Subnet IDs for the cache subnet group. | `list(string)` | `[]` | no | common for both | |
 | security_group_ids | One or more Amazon VPC security groups associated with this replication group. Use this parameter only when you are creating a replication group in an Amazon Virtual Private Cloud | `list(string)` | `[]` | no | common for both | |
 | parameter_group_name | The name of the parameter group to associate with this replication group. If this argument is omitted, the default cache parameter group for the specified engine is used. To enable "cluster mode", i.e. data sharding, use a parameter group that has the parameter cluster-enabled set to true. | `string` | `null` | no | common for both | |
-| apply_immediately | Specifies whether any modifications are applied immediately, or during the next maintenance window. Default is false. | `bool` | `false` | no | common for both | |
-| parameter_group_enabled | If you want to create Elasticache parameter from module override this variable. | `bool` | `true` | no | common for both | `true/false` |
+| apply_immediately | Specifies whether any modifications are applied immediately, or during the next maintenance window. Default is false. | `bool` | `false` | no | common for both | `true/false` |
 | parameter | A list of Redis & memcached parameters to apply depends engine type. Note that parameters may differ from one family to another. when parameter_group_enabled == true | `list(object)` | `[]` | no | common for both | |
 | tags  | Specify tags values for AWS resource | `map(string)` | `{}` | no | common for both | |
 | replication_group_description | A user-created description for the replication group. | `string` | `null`| no | Redis | |
 | number_cache_clusters | The number of cache clusters (primary and replicas) this replication group will have. If Multi-AZ is enabled, the value of this parameter must be at least 2. Updates will occur before other modifications. Valid this in case of Redis Cluster mode disabled | `number` | `1` | no | Redis ||
-| automatic_failover_enabled | Specifies whether a read-only replica will be automatically promoted to read/write primary if the existing primary fails. If enabled, number_cache_clusters must be greater than 1. | `bool` | `false` | no | Redis ||
+| automatic_failover_enabled | Specifies whether a read-only replica will be automatically promoted to read/write primary if the existing primary fails. If enabled, number_cache_clusters must be greater than 1. | `bool` | `false` | no | Redis | `true/false` |
 | multi_az_enabled | Specifies whether to enable Multi-AZ Support for the replication group. | `bool` | `false` | no | Redis | `true/false` |
 | auto_minor_version_upgrade | Specifies whether a minor engine upgrades will be applied automatically to the underlying Cache Cluster instances during the maintenance window. This parameter is currently not supported by the AWS API. Defaults to true. | `bool` | `true` | no | Redis | `true/false` |
-| at_rest_encryption_enabled | Whether to enable encryption at rest. | `bool` | `false` | no | Redis ||
+| at_rest_encryption_enabled | Whether to enable encryption at rest. | `bool` | `false` | no | Redis | `true/false` |
 | transit_encryption_enabled | Whether to enable encryption in transit. | `bool` | `false` | no | Redis | `true/false`|
-| auth_token | The password used to access a password protected server. Can be specified only if transit_encryption_enabled = true. | `string` | `null` | no | Redis | `true/false` |
-| kms_key_id | The ARN of the key that you wish to use if encrypting at rest. If not supplied, uses service managed encryption. Can be specified only if at_rest_encryption_enabled = true. | `string` | `null` | no | Redis | `true/false` |
+| auth_token | The password used to access a password protected server. Can be specified only if transit_encryption_enabled = true. | `string` | `null` | no | Redis | |
+| kms_key_id | The ARN of the key that you wish to use if encrypting at rest. If not supplied, uses service managed encryption. Can be specified only if at_rest_encryption_enabled = true. | `string` | `null` | no | Redis | |
 | redis_engine_version | The version number of the cache engine to be used for the **Redis clusters** in this replication group. | `string` | `6.x` | no | Redis | `6.x`<br>`5.0.6`<br>`4.0.10`<br>`3.2.10`<br>`3.2.6`<br>`3.2.4`<br>`2.8.24`<br>`2.8.23`<br>`2.8.22`<br>`2.8.22`<br>`2.8.19`<br>`2.8.6`<br>`2.6.13` |
 | redis_family | The family of the Redis cluster parameter group. | `string` | `redis6.x` | no | Redis | `redis6.x`<br>`redis5.0`<br>`redis4.0`<br>`redis3.2`<br>`redis2.8`<br>`redis2.6` |
 | snapshot_arns | A list of Amazon Resource Names (ARNs) that identify Redis RDB snapshot files stored in Amazon S3. The names object names cannot contain any commas. | `list(string)` | `null` | no | redis | |
@@ -56,7 +135,7 @@ module "memcached" {
 | snapshot_retention_limit | The number of days for which ElastiCache will retain automatic cache cluster snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, then a snapshot that was taken today will be retained for 5 days before being deleted. If the value of SnapshotRetentionLimit is set to zero (0), backups are turned off. Please note that setting a snapshot_retention_limit is not supported on cache.t1.micro cache nodes | `number` | `0` | no | Redis ||
 | final_snapshot_identifier | The name of your final node group (shard) snapshot. ElastiCache creates the snapshot from the primary node in the cluster. If omitted, no final snapshot will be made. | `string` | `null` | no | Redis | |
 | cluster_mode_enabled | Specify the mode of redis cluster means cluster mode disabled and cluster mode enabled | `bool` | `false` | no | Redis | |
-| replicas_per_node_group | Specify the number of replica nodes in each node group. Valid values are 0 to 5. Changing this number will trigger an online resizing operation before other settings modifications. valid only when cluster_mode_enabled = true | `number` | `0` | no | Redis | `0,1,2,3,4,5` |
+| replicas_per_node_group | Specify the number of replica nodes in each node group. Valid values are 0 to 5. Changing this number will trigger an online resizing operation before other settings modifications. valid only when cluster_mode_enabled = true | `number` | `0` | no | Redis | `0 to 5` |
 | num_node_groups | Specify the number of node groups (shards) for this Redis replication group. Changing this number will trigger an online resizing operation before other settings modifications. | `number` | `1` | no | Redis | `1 to 90` | |
 | num_cache_nodes | For Memcached, this value must be between 1 and 20. If this number is reduced on subsequent runs, the highest numbered nodes will be removed. | `number` | `1` | no | Memcached | `1 to 20` |
 | az_mode | Valid values for this parameter are single-az or cross-az, default is single-az. If you want to choose cross-az, num_cache_nodes must be greater than 1. | `string` | `single-az` | no |  memcached | `single-az`<br>`cross-az` |
@@ -77,7 +156,6 @@ module "memcached" {
 | primary_endpoint_address | The address of the endpoint for the primary node in the replication group, if the cluster mode is disabled. | Redis |
 | reader_endpoint_address | The address of the endpoint for the reader node in the replication group, if the cluster mode is disabled. | Redis |
 | auth_token | For auto generated password | Redis |
-||||
 | mem_arn | The ARN of the created Memcached ElastiCache Cluster. | Memcached | 
 |configuration_endpoint | The configuration endpoint to allow host discovery. | Memcahed |
 | cluster_address | The DNS name of the cache cluster without the port appended. | Memcached |
