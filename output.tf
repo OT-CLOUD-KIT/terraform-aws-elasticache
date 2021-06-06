@@ -1,33 +1,28 @@
-output "redis_cluster_arn" {
-  value = module.redis.arn
+output "arn" {
+  value       = aws_elasticache_replication_group.redis.arn
+  description = "The Amazon Resource Name (ARN) of the created ElastiCache Replication Group."
 }
-output "redis_cluster_id" {
-  value = module.redis.id
+output "id" {
+  value       = aws_elasticache_replication_group.redis.id
+  description = "The ID of the ElastiCache Replication Group."
 }
-output "redis_cluster_configuration_endpoint_address" {
-  value = module.redis.configuration_endpoint_address
+output "cluster_enabled" {
+  value       = aws_elasticache_replication_group.redis.cluster_enabled
+  description = "Indicates if cluster mode is enabled."
 }
-output "redis_cluster_primary_endpoint_address" {
-  value = module.redis.primary_endpoint_address
+output "configuration_endpoint_address" {
+  value       = aws_elasticache_replication_group.redis.configuration_endpoint_address
+  description = "The address of the replication group configuration endpoint when cluster mode is enabled."
 }
-output "redis_cluster_reader_endpoint_address" {
-  value = module.redis.reader_endpoint_address
+output "primary_endpoint_address" {
+  value       = aws_elasticache_replication_group.redis.primary_endpoint_address
+  description = "The address of the endpoint for the primary node in the replication group, if the cluster mode is disabled."
 }
-output "redis_cluster_auth_token" {
-  value = module.redis.auth_token
+output "reader_endpoint_address" {
+  value       = aws_elasticache_replication_group.redis.reader_endpoint_address
+  description = "The address of the endpoint for the reader node in the replication group, if the cluster mode is disabled."
 }
-output "redis_cluster_enabled" {
-  value = module.redis.cluster_enabled
-}
-output "memcached_cluster_arn" {
-  value = module.memcached.mem_arn
-}
-output "memcached_cluster_configuration_endpoint" {
-  value = module.memcached.configuration_endpoint
-}
-output "memcached_cluster_cluster_address" {
-  value = module.memcached.cluster_address
-}
-output "memcached_cluster_cache_nodes" {
-  value = module.memcached.cache_nodes
+output "auth_token" {
+  value       = random_string.auth_token.*.result
+  description = "Create a random string"
 }
