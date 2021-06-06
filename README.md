@@ -80,8 +80,8 @@ module "redis" {
   subnet_ids            = ["subnet-617ae62c", "subnet-09bd3b7"]
   security_group_ids    = ["sg-0d3e8cfbd57e11ba"]
   number_cache_clusters = 1 # valid only in case when cluster_mode_enabled = false
-  redis_engine_version  = "5.0.6"
-  redis_family          = "redis5.0"
+  redis_engine_version  = "6.x"
+  redis_family          = "redis6.x"
   cluster_mode_enabled  = true
   tags                  = local.tags
   parameter = [{
