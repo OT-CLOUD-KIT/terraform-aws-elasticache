@@ -63,3 +63,66 @@ resource "aws_elasticache_replication_group" "redis" {
   }
 }
 
+resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
+  count = var.alarm_enabled ? var.number_cache_clusters : 0
+
+  alarm_name          = "alarm-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-CPUUtilization"
+  alarm_description   = "Redis cluster CPU utilization for ${aws_elasticache_replication_group.redis.id} is high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = var.evaluation_period
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ElastiCache"
+  period              = var.statistic_period
+  statistic           = "Average"
+  alarm_actions       = var.actions_alarm
+  ok_actions = var.actions_ok
+
+  threshold = "${var.alarm_cpu_threshold}"
+
+  dimensions = {
+    CacheClusterId = "${aws_elasticache_replication_group.redis.id}-00${count.index + 1}"
+  }
+}
+
+resource "aws_cloudwatch_metric_alarm" "cache_memory" {
+  count = var.alarm_enabled ? var.number_cache_clusters : 0
+
+  alarm_name          = "alarm-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-FreeableMemory"
+  alarm_description   = "Redis cluster freeable memory for ${aws_elasticache_replication_group.redis.id} is low"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = var.evaluation_period
+  metric_name         = "FreeableMemory"
+  namespace           = "AWS/ElastiCache"
+  period              = var.statistic_period
+  statistic           = "Average"
+  alarm_actions = var.actions_alarm
+  ok_actions = var.actions_ok
+
+  threshold = "${var.alarm_memory_threshold}"
+
+  dimensions = {
+    CacheClusterId = "${aws_elasticache_replication_group.redis.id}-00${count.index + 1}"
+  }
+
+}
+
+
+resource "aws_cloudwatch_metric_alarm" "elasticache_cloudwatch_alarm_currconnections" {
+  count = var.alarm_enabled ? var.number_cache_clusters : 0
+  alarm_name          = "alarm-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-Currconnections"
+  alarm_description   = "CurrConnections for ${aws_elasticache_replication_group.redis.id} have been greater pretty high. Something unusual is happening."
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = var.evaluation_period
+  metric_name         = "CurrConnections"
+  namespace           = "AWS/ElastiCache"
+  period              = var.statistic_period
+  threshold           = var.alarm_Curuuconnections_threshold
+  statistic           = "Average"
+  alarm_actions = var.actions_alarm
+  ok_actions = var.actions_ok
+  
+  dimensions = {
+    CacheClusterId = "${aws_elasticache_replication_group.redis.id}-00${count.index + 1}"
+  }
+
+}

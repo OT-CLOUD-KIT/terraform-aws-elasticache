@@ -194,3 +194,47 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+#cloudawatch
+
+variable "evaluation_period" {
+  type        = string
+  default     = "2"
+  description = "The evaluation period over which to use when triggering alarms."
+}
+
+variable "statistic_period" {
+  type        = string
+  default     = "60"
+  description = "The number of seconds that make each statistic period."
+}
+
+variable "alarm_cpu_threshold" {
+  default = "75"
+}
+
+variable "alarm_enabled" {
+  default = "true"
+}
+
+variable "actions_alarm" {
+  type        = list
+  default     = []
+  description = "A list of actions to take when alarms are triggered. Will likely be an SNS topic for event distribution."
+}
+
+variable "alarm_memory_threshold" {
+  # 10MB
+  default = "10000000"
+}
+
+variable "actions_ok" {
+  type        = list
+  default     = []
+  description = "A list of actions to take when alarms are cleared. Will likely be an SNS topic for event distribution."
+}
+
+variable "alarm_Curuuconnections_threshold" {
+  # 10MB
+  default = "40000"
+}
