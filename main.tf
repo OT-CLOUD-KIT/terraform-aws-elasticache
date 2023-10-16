@@ -66,7 +66,7 @@ resource "aws_elasticache_replication_group" "redis" {
 resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
   count = var.alarm_enabled ? var.number_cache_clusters : 0
 
-  alarm_name          = "alarm-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-CPUUtilization"
+  alarm_name          = "${var.env}-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-CPUUtilization"
   alarm_description   = "Redis cluster CPU utilization for ${aws_elasticache_replication_group.redis.id} is high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.evaluation_period
@@ -87,7 +87,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
 resource "aws_cloudwatch_metric_alarm" "cache_memory" {
   count = var.alarm_enabled ? var.number_cache_clusters : 0
 
-  alarm_name          = "alarm-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-FreeableMemory"
+  alarm_name          = "${var.env}-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-FreeableMemory"
   alarm_description   = "Redis cluster freeable memory for ${aws_elasticache_replication_group.redis.id} is low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = var.evaluation_period
@@ -109,7 +109,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_memory" {
 
 resource "aws_cloudwatch_metric_alarm" "elasticache_cloudwatch_alarm_currconnections" {
   count = var.alarm_enabled ? var.number_cache_clusters : 0
-  alarm_name          = "alarm-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-Currconnections"
+  alarm_name          = "${var.env}-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-Currconnections"
   alarm_description   = "CurrConnections for ${aws_elasticache_replication_group.redis.id} have been greater pretty high. Something unusual is happening."
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.evaluation_period
