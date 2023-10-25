@@ -14,7 +14,7 @@ resource "random_string" "auth_token" {
 /*-------------------------------------------------------*/
 resource "aws_elasticache_parameter_group" "default" {
   count  = length(var.parameter_group_name) == 0 && var.parameter_group_enabled ? 1 : 0
-  name   = "parameter-group-redis-${var.name}${var.cluster_mode_enabled ? "-cluster-on" : ""}"
+  name   = "${var.env}-parameter-group-redis-${var.name}${var.cluster_mode_enabled ? "-cluster-on" : ""}"
   family = var.redis_family
 
   dynamic "parameter" {
