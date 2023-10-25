@@ -28,7 +28,7 @@ resource "aws_elasticache_parameter_group" "default" {
 
 /*-------------------------------------------------------*/
 resource "aws_elasticache_replication_group" "redis" {
-  replication_group_id          = "${lower(var.name)}-redis-cluster"
+  replication_group_id          = "${var.env}-${lower(var.name)}-redis-cluster"
   replication_group_description = var.replication_group_description != "" ? var.replication_group_description : "${var.name} Redis Cluster"
   number_cache_clusters         = var.cluster_mode_enabled ? null : ((var.automatic_failover_enabled || var.multi_az_enabled) && var.number_cache_clusters == 1 ? var.number_cache_clusters + 1 : var.number_cache_clusters)
   node_type                     = var.node_type
@@ -66,7 +66,7 @@ resource "aws_elasticache_replication_group" "redis" {
 resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
   count = var.alarm_enabled ? var.number_cache_clusters : 0
 
-  alarm_name          = "${var.env}-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-CPUUtilization"
+  alarm_name          = "${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-CPUUtilization"
   alarm_description   = "Redis cluster CPU utilization for ${aws_elasticache_replication_group.redis.id} is high"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.evaluation_period
@@ -87,7 +87,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
 resource "aws_cloudwatch_metric_alarm" "cache_memory" {
   count = var.alarm_enabled ? var.number_cache_clusters : 0
 
-  alarm_name          = "${var.env}-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-FreeableMemory"
+  alarm_name          = "${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-FreeableMemory"
   alarm_description   = "Redis cluster freeable memory for ${aws_elasticache_replication_group.redis.id} is low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = var.evaluation_period
@@ -109,7 +109,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_memory" {
 
 resource "aws_cloudwatch_metric_alarm" "elasticache_cloudwatch_alarm_currconnections" {
   count = var.alarm_enabled ? var.number_cache_clusters : 0
-  alarm_name          = "${var.env}-${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-Currconnections"
+  alarm_name          = "${aws_elasticache_replication_group.redis.id}-CacheCluster00${count.index + 1}-Currconnections"
   alarm_description   = "CurrConnections for ${aws_elasticache_replication_group.redis.id} have been greater pretty high. Something unusual is happening."
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = var.evaluation_period
