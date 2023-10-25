@@ -1,6 +1,6 @@
 /*-------------------------------------------------------*/
 resource "aws_elasticache_subnet_group" "elasticache" {
-  name       = "${var.name}-redis-cache-subnet"
+  name       = "${var.env}-${var.name}-redis-cache-subnet"
   subnet_ids = var.subnet_ids
   tags       = merge({ "Provisioned" = "Terraform" }, var.tags)
 }
