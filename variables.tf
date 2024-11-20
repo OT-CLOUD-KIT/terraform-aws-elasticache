@@ -62,7 +62,7 @@ variable "redis_engine_version" {
   default     = "6.x"
   description = "The version number of the cache engine to be used for the cache clusters in this replication group."
   validation {
-    condition     = contains(["7.x", "7.0", "6.x", "5.0.6", "4.0.10", "3.2.10", "3.2.6", "3.2.4", "2.8.24", "2.8.23", "2.8.22", "2.8.22", "2.8.19", "2.8.6", "2.6.13"], var.redis_engine_version)
+    condition     = contains(["7.x", "7.0.7", "6.x", "5.0.6", "4.0.10", "3.2.10", "3.2.6", "3.2.4", "2.8.24", "2.8.23", "2.8.22", "2.8.22", "2.8.19", "2.8.6", "2.6.13"], var.redis_engine_version)
     error_message = "Currently Redis Supported version are \"7.0.7\", \"6.x\",\"5.0.6\",\"4.0.10\",\"3.2.10\",\"3.2.6\",\"3.2.4\",\"2.8.24\",\"2.8.23\",\"2.8.22\",\"2.8.22\",\"2.8.19\",\"2.8.6\",\"2.6.13\"."
   }
 }
