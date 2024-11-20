@@ -62,8 +62,8 @@ variable "redis_engine_version" {
   default     = "6.x"
   description = "The version number of the cache engine to be used for the cache clusters in this replication group."
   validation {
-    condition     = contains(["6.x", "5.0.6", "4.0.10", "3.2.10", "3.2.6", "3.2.4", "2.8.24", "2.8.23", "2.8.22", "2.8.22", "2.8.19", "2.8.6", "2.6.13"], var.redis_engine_version)
-    error_message = "Currently Redis Supported version are \"6.x\",\"5.0.6\",\"4.0.10\",\"3.2.10\",\"3.2.6\",\"3.2.4\",\"2.8.24\",\"2.8.23\",\"2.8.22\",\"2.8.22\",\"2.8.19\",\"2.8.6\",\"2.6.13\"."
+    condition     = contains(["7.0.7", "6.x", "5.0.6", "4.0.10", "3.2.10", "3.2.6", "3.2.4", "2.8.24", "2.8.23", "2.8.22", "2.8.22", "2.8.19", "2.8.6", "2.6.13"], var.redis_engine_version)
+    error_message = "Currently Redis Supported version are \"7.0.7\", \"6.x\",\"5.0.6\",\"4.0.10\",\"3.2.10\",\"3.2.6\",\"3.2.4\",\"2.8.24\",\"2.8.23\",\"2.8.22\",\"2.8.22\",\"2.8.19\",\"2.8.6\",\"2.6.13\"."
   }
 }
 
@@ -72,8 +72,8 @@ variable "redis_family" {
   default     = "redis6.x"
   description = "The family of the Redis cluster parameter group."
   validation {
-    condition     = contains(["redis6.x", "redis5.0", "redis4.0", "redis3.2", "redis2.8", "redis2.6"], var.redis_family)
-    error_message = "Valid values are \"redis6.x\",\"redis5.0\",\"redis4.0\",\"redis3.2\",\"redis2.8\",\"redis2.6\"."
+    condition     = contains(["redis7.x", "redis6.x", "redis5.0", "redis4.0", "redis3.2", "redis2.8", "redis2.6"], var.redis_family)
+    error_message = "Valid values are \"redis7.x\",\"redis5.0\",\"redis4.0\",\"redis3.2\",\"redis2.8\",\"redis2.6\"."
   }
 }
 
